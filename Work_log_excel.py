@@ -35,7 +35,7 @@ tab_colors = [
     "D9D2E9", "C9DAF8", "F4CCCC"
 ]
 
-file_path = "/content/UPSC_Study_Log_May_2025_Final.xlsx"
+file_path = "/content/Work_Study_Log_May_2025_Final.xlsx"
 
 # === Step 1: Create base workbook ===
 with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
