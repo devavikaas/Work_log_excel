@@ -1,56 +1,90 @@
-# Work Log Excel
+📘 UPSC Study Log – June 2025
+This Python script automatically generates a fully formatted Excel-based daily study tracker for the entire month of June 2025, designed to help UPSC aspirants plan, log, and analyze their daily preparation with precision.
 
-This Python script helps you track your work or study time in Excel. It automates the logging of start and end times, calculates durations, and generates daily summaries for your tasks and breaks.
+🔑 Key Features:
+📅 One Sheet per Day
+Creates 30 separate sheets (June 1–30), each representing a day with pre-defined columns for time logging and task tracking.
 
-## Features:
-- Track study/work time and breaks.
-- Automatically calculate time durations.
-- Generate Excel reports with work session summaries.
+🕒 Smart Time Logging
 
-README.md: Detailed Explanation of the Work Log Excel Code
-markdown
+Start Time, End Time, and auto-calculated Duration in minutes
+
+Auto-fill formulas chain Start Times from the previous End Time
+
+🔽 Drop-Down for Task Type
+Each row includes a drop-down to mark the entry as either a Task or a Break
+
+🧮 Daily Summary Section
+Each day's sheet calculates:
+
+Total Study Time
+
+Total Break Time
+
+Focus Ratio (Study / Total Time)
+
+🎨 Clean Visual Formatting
+
+Bold headers, colored columns, and styled tables
+
+Column widths auto-adjusted for readability
+
+Sheet tabs colored for easy navigation
+
+📊 Monthly Summary Sheet
+
+Aggregates daily totals and focus ratios
+
+Displays the data in a structured summary table for quick review
+
+🏠 Home Sheet with Hyperlinks
+
+Central landing page with clickable links to all 30 daily sheets
+
+Improves navigation across the workbook
+
+📥 Ready for Download (Google Colab Compatible)
+Automatically triggers download after generation if used in Google Colab
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Code explanation
+
+📦 Library Imports
+python
 Copy
 Edit
-# Work Log Excel – Time Tracking with Google Colab
-
-This Python script generates an Excel workbook for tracking work and study sessions over a specific date range. It uses `pandas`, `openpyxl`, and Excel formulas to automate time logging, calculations, and formatting. The workbook includes detailed daily logs, summary reports, and automatic calculations for duration and focus ratio.
-
-## Code Breakdown
-
-### Import Libraries
-
-```python
 import pandas as pd
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.utils import get_column_letter
+from openpyxl.comments import Comment
 from datetime import datetime
-pandas: Used for date range generation and managing data.
+pandas is used to initially create and write blank DataFrames to Excel sheets.
 
-openpyxl: Library for handling Excel file creation, modification, and formatting.
+openpyxl handles all the formatting, formulas, styling, and worksheet manipulation.
 
-Font, PatternFill, Alignment: Used for customizing the fonts, fills, and alignments in the Excel sheet.
+Styling tools like Font, PatternFill, and Alignment allow detailed customization.
 
-Table, TableStyleInfo: For creating tables with styles in the workbook.
+Table, TableStyleInfo — define Excel tables with stylings.
 
-DataValidation: For adding dropdown lists to specific cells (e.g., selecting between "Task" or "Break").
+DataValidation — used for dropdowns.
 
-get_column_letter: Used to convert column indexes to Excel column letters.
+get_column_letter helps with Excel-style column referencing (like A, B, C…).
 
-datetime: For handling date and time operations.
+datetime is used to define the study period (June 2025).
 
-Step 1: Configuration and Base Workbook Creation
+🗓️ Configuration Section
 python
 Copy
 Edit
-start_date = datetime(2025, 5, 2)
-end_date = datetime(2025, 5, 25)
+start_date = datetime(2025, 6, 1)
+end_date = datetime(2025, 6, 30)
 date_range = pd.date_range(start=start_date, end=end_date)
-start_date and end_date specify the range of dates for which the work log will be generated.
+Define the month range — here June 2025.
 
-date_range generates a series of dates between start_date and end_date using pandas.date_range.
+date_range contains all 30 dates from June 1 to June 30.
 
 python
 Copy
@@ -59,7 +93,9 @@ columns = [
     "Start Time", "End Time", "Duration (minutes)",
     "Type", "Task Name", "Description / Subject", "Remarks"
 ]
-columns: Defines the column headers that will appear in the workbook for each work log entry.
+Defines column headers for each sheet (one per day).
+
+These represent logged time and tasks.
 
 python
 Copy
@@ -67,13 +103,13 @@ Edit
 header_colors = [
     "FBE5D6", "D9EAD3", "D9D2E9", "CFE2F3", "FFF2CC", "F4CCCC", "EAD1DC"
 ]
-header_fills = [
-    PatternFill(start_color=color, end_color=color, fill_type="solid")
-    for color in header_colors
-]
-header_colors: List of colors to be used in the header row for each column.
+These hex colors are for each column header to differentiate them visually.
 
-header_fills: Applies the colors as PatternFill styles to the header cells.
+python
+Copy
+Edit
+header_fills = [PatternFill(start_color=c, end_color=c, fill_type="solid") for c in header_colors]
+Convert colors into Excel fill styles.
 
 python
 Copy
@@ -81,169 +117,186 @@ Edit
 header_font = Font(bold=True, size=16)
 cell_font = Font(size=14)
 wrap_alignment = Alignment(wrap_text=True, vertical="top")
-header_font: Specifies the font style for headers (bold and size 16).
-
-cell_font: Specifies the font style for data cells (size 14).
-
-wrap_alignment: Defines alignment with word wrap and vertical alignment at the top of each cell.
-
-python
-Copy
-Edit
 summary_fill = PatternFill(start_color="F2F2F2", end_color="F2F2F2", fill_type="solid")
-summary_fill: Defines a fill color for summary cells (light grey).
+Define font and alignment styles for headers and cells.
+
+summary_fill is used in the summary block for totals.
 
 python
 Copy
 Edit
-file_path = "/content/Work_Study_Log_May_2025_Final.xlsx"
-file_path: Specifies the location where the final Excel file will be saved.
+tab_colors = [
+    ...
+]
+Colors for each day-tab. Repeats if more days than colors.
 
-Step 2: Creating the Excel Workbook and Sheet Formatting
+python
+Copy
+Edit
+file_path = "/content/UPSC_Study_Log_June_2025.xlsx"
+Output file path (for Google Colab).
+
+📄 Step 1: Create Sheets with Placeholder Data
 python
 Copy
 Edit
 with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
-    for date in date_range:
-        sheet_name = date.strftime("%Y-%m-%d")
+    for i, date in enumerate(date_range, 1):
+        sheet_name = str(i)
         df = pd.DataFrame([[""] * len(columns)], columns=columns)
         df.to_excel(writer, sheet_name=sheet_name, index=False)
-This block creates a new Excel workbook using pandas.ExcelWriter.
+Creates 30 sheets named 1 to 30, each with a blank row and the predefined columns.
 
-For each date in date_range, a new sheet is created with the date as the sheet name.
-
-An empty DataFrame (df) is written to each sheet, with the defined columns.
-
-Step 3: Applying Styles, Formulas, and Validation
+🎨 Step 2: Format Each Daily Sheet
 python
 Copy
 Edit
 wb = openpyxl.load_workbook(file_path)
-Loads the Excel workbook created in the previous step using openpyxl.
+Re-opens the Excel file for further styling and manipulation.
 
 python
 Copy
 Edit
 for i, sheet_name in enumerate(wb.sheetnames):
-    if sheet_name == "Summary":
+    if sheet_name == "Summary" or sheet_name == "Home":
         continue
-    ws = wb[sheet_name]
-Loops over all sheet names (except "Summary").
+Skip formatting Summary and Home (they’ll be created later).
 
-For each sheet, it accesses the corresponding ws (worksheet) object.
-
+🔹 Date Title
 python
 Copy
 Edit
-# Styled headers
+actual_date = date_range[i].strftime("%B %d, %Y")
+...
+ws.insert_rows(1)
+ws["A1"] = actual_date
+...
+Adds the actual date (like “June 01, 2025”) in the top merged cell.
+
+🔹 Header Styling
+python
+Copy
+Edit
 for col_idx, (fill, header) in enumerate(zip(header_fills, columns), 1):
-    cell = ws.cell(row=1, column=col_idx, value=header)
-    cell.font = header_font
-    cell.fill = fill
-    cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-For each column, the header cell is styled with the font, fill color, and alignment defined earlier.
+    ...
+Applies background fill and bold text to headers.
+
+🔹 Row Formatting & Time Columns
+python
+Copy
+Edit
+for row in ws.iter_rows(min_row=3, max_row=102, min_col=1, max_col=len(columns)):
+    ...
+Formats cell fonts and text wrapping for the first 100 data rows (row 3 to 102).
 
 python
 Copy
 Edit
-# Apply font size 14 and word wrap to all data cells
-for row in ws.iter_rows(min_row=2, max_row=100, min_col=1, max_col=len(columns)):
-    for cell in row:
-        cell.font = cell_font
-        cell.alignment = wrap_alignment
-This applies the font style and word wrapping to all data cells in each row (starting from row 2).
+ws[f"A{row}"].number_format = "h:mm:ss AM/PM"
+...
+ws[f"A{row}"] = f"=B{row - 1}"
+...
+Applies time formatting and auto-fill formulas:
 
-Step 4: Adding Formulas and Data Validation
+Start time = Previous row’s End time
+
+Duration = difference between End and Start
+
+🔽 Dropdown for “Type”
 python
 Copy
 Edit
-# Manual formulas for Start Time and Duration
-for row in range(2, 100):
-    start_cell = f"A{row+1}"
-    end_cell = f"B{row}"
-    duration_cell = f"C{row}"
-    ws[start_cell] = f"={end_cell}"
-    ws[duration_cell] = f"=IF(AND(ISNUMBER(B{row}), ISNUMBER(A{row})), ROUND((B{row}-A{row})*1440, 0), \"\")"
-Adds formulas to calculate the Start Time and Duration (in minutes). The formula calculates the difference between start and end times, multiplying by 1440 to convert hours to minutes.
-
-python
-Copy
-Edit
-# Dropdown in "Type" column
 dv = DataValidation(type="list", formula1='"Task,Break"', allow_blank=True)
 ws.add_data_validation(dv)
-dv.add("D2:D100")
-Adds a dropdown list to the "Type" column (cells D2 to D100) for users to select "Task" or "Break".
+dv.add("D3:D102")
+Adds a dropdown to the “Type” column for selecting either Task or Break.
 
+🔢 Add Table for Excel UI
 python
 Copy
 Edit
-# Add table
-end_col_letter = get_column_letter(len(columns))
-table_range = f"A1:{end_col_letter}100"
-table_name = "T_" + sheet_name.replace("-", "_")
 table = Table(displayName=table_name, ref=table_range)
-table_style = TableStyleInfo(name="TableStyleMedium6", showRowStripes=True)
-table.tableStyleInfo = table_style
+...
 ws.add_table(table)
-Creates an Excel table for each sheet, applying a style and referencing the data range.
+Adds an Excel table so the range looks neat and functions like a database.
 
-Step 5: Adding Summary Calculations
+📊 Summary Block (Daily)
 python
 Copy
 Edit
-# Summary block on right
-ws["I1"] = "Total Study Time"
-ws["J1"] = "=SUMIF(D2:D100, \"Task\", C2:C100)/1440"
-ws["I2"] = "Total Break Time"
-ws["J2"] = "=SUMIF(D2:D100, \"Break\", C2:C100)/1440"
-ws["I3"] = "Focus Ratio"
-ws["J3"] = "=IF((J1+J2)=0, 0, J1/(J1+J2))"
-Adds formulas for total study time, total break time, and focus ratio to the right side of each sheet. Focus ratio is calculated by dividing study time by the sum of study and break times.
+ws["I2"] = "Total Study Time"
+...
+ws["J2"] = "=SUMIF(D3:D102, \"Task\", C3:C102)/1440"
+Creates summary cells on the side:
 
-Step 6: Creating the Summary Sheet
+Total Study Time → Sums all “Task” durations
+
+Total Break Time → Sums all “Break” durations
+
+Focus Ratio → Task / (Task + Break)
+
+📐 Auto Adjust Column Width
+python
+Copy
+Edit
+for col_idx in range(1, len(columns) + 1):
+    ...
+Sets column width dynamically based on longest value in each.
+
+🟦 Sheet Tab Colors
+python
+Copy
+Edit
+ws.sheet_properties.tabColor = tab_colors[i % len(tab_colors)]
+Adds color to the bottom tab for visual navigation.
+
+🧾 Step 3: Create Summary Sheet
 python
 Copy
 Edit
 summary = wb.create_sheet("Summary")
-summary_headers = ["Day", "Total Study Time", "Total Break Time", "Focus Ratio"]
-Creates a new "Summary" sheet to aggregate data from all other sheets.
-
-Adds headers for "Day", "Total Study Time", "Total Break Time", and "Focus Ratio".
+headers = ["Day", "Total Study Time", "Total Break Time", "Focus Ratio"]
+...
+Adds a new sheet summarizing all 30 days.
 
 python
 Copy
 Edit
-for sheet in wb.sheetnames:
-    if sheet == "Summary":
-        continue
-    sheet_ref = f"'{sheet}'"
-    summary[f"A{row}"] = sheet
-    summary[f"B{row}"] = f"=SUMIF({sheet_ref}!D2:D100, \"Task\", {sheet_ref}!C2:C100)/1440"
-    summary[f"C{row}"] = f"=SUMIF({sheet_ref}!D2:D100, \"Break\", {sheet_ref}!C2:C100)/1440"
-    summary[f"D{row}"] = f"=IF((B{row}+C{row})=0, 0, B{row}/(B{row}+C{row}))"
-For each sheet (except "Summary"), it pulls the total study time, total break time, and focus ratio into the summary sheet using SUMIF formulas.
+for i in range(1, len(date_range) + 1):
+    ...
+    summary[f"B{i+1}"] = f"=SUMIF('{i}'!D3:D102, \"Task\", '{i}'!C3:C102)/1440"
+For each day, reference the matching sheet and summarize its totals.
 
-Step 7: Finalizing the Workbook
+python
+Copy
+Edit
+summary_table = Table(displayName="SummaryTable", ref=summary_range)
+summary.add_table(summary_table)
+Adds Excel table formatting to the summary sheet.
+
+🏠 Step 4: Create Home Sheet with Hyperlinks
+python
+Copy
+Edit
+home = wb.create_sheet("Home", 0)
+...
+for i in range(1, len(date_range) + 1):
+    cell = home.cell(row=i + 1, column=1, value=f"Day {i}")
+    ...
+    cell.hyperlink = f"#{i}!A1"
+Adds a front-page sheet named "Home" with clickable hyperlinks to each daily log.
+
+💾 Final Save and Optional Download
 python
 Copy
 Edit
 wb.save(file_path)
-Saves the workbook to the specified file_path.
+Saves the workbook with all edits.
 
 python
 Copy
 Edit
-# Optional: For Colab download
 from google.colab import files
 files.download(file_path)
-If running in Google Colab, this line allows you to download the generated Excel file directly to your local machine.
+For Colab: triggers download of the generated Excel file.
 
-Conclusion
-This script provides a comprehensive and automated time tracking log in Excel format, with built-in calculations and summaries, ideal for managing work/study sessions. It includes features such as automatic time entry, duration calculation, and a daily focus ratio, making it a powerful tool for tracking productivity. 
-
-## License
-MIT License
-
-## Keywords:
-time tracking, work log, study log, Excel automation, Python script
